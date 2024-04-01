@@ -84,7 +84,7 @@ def load_images(folder_or_list, size, square_ok=False):
         supported_images_extensions += ['.heic', '.heif']
     supported_images_extensions = tuple(supported_images_extensions)
 
-    imgs = []
+    imgs, scales = [], []
     for path in folder_content:
         if not path.endswith(supported_images_extensions):
             continue
@@ -108,10 +108,12 @@ def load_images(folder_or_list, size, square_ok=False):
             img = img.crop((cx-halfw, cy-halfh, cx+halfw, cy+halfh))
 
         W2, H2 = img.size
-        print(f' - adding {path} with resolution {W1}x{H1} --> {W2}x{H2}')
+        scale = W2 / W1
+        print(f' - adding {path} with resolution {W1}x{H1} --> {W2}x{H2}. scale: {round(scale, 2)}')
         imgs.append(dict(img=ImgNorm(img)[None], true_shape=np.int32(
             [img.size[::-1]]), idx=len(imgs), instance=str(len(imgs))))
+        scales.append(scale)
 
     assert imgs, 'no images foud at '+root
     print(f' (Found {len(imgs)} images)')
-    return imgs
+    return imgs, scales
